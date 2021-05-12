@@ -12,10 +12,11 @@ import escapism
 
 # Only use syntax features supported by Docker 17.09
 TEMPLATE = r"""
-FROM buildpack-deps:bionic
+FROM nvidia/cuda:11.3.0-devel-ubuntu18.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
+
 
 # Set up locales properly
 RUN apt-get -qq update && \
@@ -52,8 +53,11 @@ RUN groupadd \
         --uid ${NB_UID} \
         ${NB_USER}
 
-RUN wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key |  apt-key add - && \
-    DISTRO="bionic" && \
+# We need to install wget first
+RUN apt-get -qq update && apt-get -qq install --yes  wget
+
+RUN wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key |  apt-key add - 
+RUN DISTRO="bionic" && \
     echo "deb https://deb.nodesource.com/node_14.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list && \
     echo "deb-src https://deb.nodesource.com/node_14.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list
 
