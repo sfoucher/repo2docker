@@ -20,10 +20,10 @@ FROM {{ base_image }}
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-
+USER root
 # Set up locales properly
-RUN apt-get -qq update && \
-    apt-get -qq install --yes --no-install-recommends locales > /dev/null && \
+RUN apt-get -qq update
+RUN apt-get -qq install --yes --no-install-recommends locales > /dev/null && \
     apt-get -qq purge && \
     apt-get -qq clean && \
     rm -rf /var/lib/apt/lists/*
@@ -57,7 +57,7 @@ RUN groupadd \
         ${NB_USER}
 
 # We need to install wget first
-RUN apt-get -qq update && apt-get -qq install --yes  wget
+RUN apt-get -qq update && apt-get -qq install --yes  wget gnupg
 
 RUN wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key |  apt-key add - 
 RUN DISTRO="bionic" && \
@@ -191,7 +191,8 @@ COPY /repo2docker-entrypoint /usr/local/bin/repo2docker-entrypoint
 ENTRYPOINT ["/usr/local/bin/repo2docker-entrypoint"]
 
 # Specify the default command to run
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--NotebookApp.token", "", "--NotebookApp.password", ""]
+
 
 {% if appendix -%}
 # Appendix:
@@ -257,6 +258,7 @@ class BuildPack:
             "less",
             "nodejs",
             "unzip",
+            "gnupg",
         }
 
     def get_build_env(self):
