@@ -12,7 +12,10 @@ import escapism
 
 # Only use syntax features supported by Docker 17.09
 TEMPLATE = r"""
-FROM nvidia/cuda:11.3.0-devel-ubuntu18.04
+# FROM nvidia/cuda:11.3.0-runtime-ubuntu18.04
+{% if base_image -%}
+FROM {{ base_image }}
+{% endif -%}
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -223,6 +226,7 @@ class BuildPack:
         self.log = logging.getLogger("repo2docker")
         self.appendix = ""
         self.labels = {}
+        self.BASE_IMAGE= "buildpack-deps:bionic"
         if sys.platform.startswith("win"):
             self.log.warning(
                 "Windows environment detected. Note that Windows "
@@ -292,6 +296,12 @@ class BuildPack:
         it is very commonly set by various buildpacks.
         """
         return []
+
+    def get_base_image(self):
+        """
+        Docker labels to set on the built image.
+        """
+        return self.BASE_IMAGE
 
     def get_labels(self):
         """
@@ -458,7 +468,7 @@ class BuildPack:
         build_args = build_args or {}
 
         t = jinja2.Template(TEMPLATE)
-
+        base_image= self.get_base_image()
         build_script_directives = []
         last_user = "root"
         for user, script in self.get_build_scripts():
@@ -504,6 +514,7 @@ class BuildPack:
         self._check_stencila()
 
         return t.render(
+            base_image= base_image,
             packages=sorted(self.get_packages()),
             path=self.get_path(),
             build_env=self.get_build_env(),

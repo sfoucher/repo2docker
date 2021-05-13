@@ -382,6 +382,16 @@ class Repo2Docker(Application):
         config=True,
     )
 
+    base_image= Unicode(
+        "buildpack-deps:bionic",
+        help="""
+        Base image to derive from.
+
+        Defaults is: buildpack-deps:bionic
+        """,
+        config=True,
+    )
+
     def fetch(self, url, ref, checkout_path):
         """Fetch the contents of `url` and place it in `checkout_path`.
 
@@ -714,6 +724,7 @@ class Repo2Docker(Application):
                     picked_buildpack = self.default_buildpack()
 
                 picked_buildpack.appendix = self.appendix
+                picked_buildpack.BASE_IMAGE = self.base_image
                 # Add metadata labels
                 picked_buildpack.labels["repo2docker.version"] = self.version
                 repo_label = "local" if os.path.isdir(self.repo) else self.repo

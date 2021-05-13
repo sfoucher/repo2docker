@@ -199,6 +199,7 @@ def get_argparser():
         action="store_true",
         help="Use the local repository in edit mode",
     )
+    argparser.add_argument("--base-image", dest="base_image", default=Repo2Docker.base_image.default_value, help=Repo2Docker.base_image.help)
 
     argparser.add_argument("--target-repo-dir", help=Repo2Docker.target_repo_dir.help)
 
@@ -263,6 +264,9 @@ def make_r2d(argv=None):
                 extra=dict(phase="failed"),
             )
             sys.exit(1)
+    
+    r2d.base_image = args.base_image
+    
 
     if args.image_name:
         r2d.output_image_spec = args.image_name
